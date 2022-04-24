@@ -7,6 +7,7 @@ import {
 } from '@chakra-ui/react'
 import { forwardRef, ForwardRefRenderFunction } from 'react'
 import { FieldError } from 'react-hook-form'
+
 /*
   INPUTPROPS as CHAKRAINPUTPROPS : usado para extender todas as propriedades do input na interface e assim fazer com que o componente utilize todas essas props do input
 
@@ -24,19 +25,21 @@ import { FieldError } from 'react-hook-form'
   
 
 
-  A propriedade error que o meu input recebe vem do react-hook-form chamada FieldError
+  A propriedade error que o meu input recebe a tipagem do react-hook-form chamada FieldError
 
   O componente do Chakra FormControl recebe uma propriedade chamada isValid para informar se esté campo está ou não inválido.
+
+  O componente FormErrorMessage é usado para mostrar uma mensagem de erro 
   */
 
 interface InputProps extends ChakraInputProps {
   name: string
   label?: string
-  error: FieldError
+  error?: FieldError
 }
 
 const InputBase: ForwardRefRenderFunction<HTMLInputElement, InputProps> = (
-  { name, label, error, ...rest },
+  { name, label, error = null, ...rest },
   ref
 ) => {
   return (
@@ -56,12 +59,9 @@ const InputBase: ForwardRefRenderFunction<HTMLInputElement, InputProps> = (
         {...rest}
       />
 
-        {!!error && (
-          <FormErrorMessage>
-            {error.message}
-          </FormErrorMessage>
-        )}
+      {/* se existir erro o meu componente irá mostrar no momento da validação */}
 
+      {!!error && <FormErrorMessage>{error.message}</FormErrorMessage>}
     </FormControl>
   )
 }

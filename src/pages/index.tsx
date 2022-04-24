@@ -1,12 +1,10 @@
 import {
   Flex,
   Button,
-  Stack,
-  FormLabel,
-  Input as InputChakra
-} from '@chakra-ui/react'
-import { forwardRef } from 'react'
+  Stack} from '@chakra-ui/react'
 import { SubmitHandler, useForm } from 'react-hook-form'
+import * as yup from 'yup'
+import { yupResolver } from '@hookform/resolvers/yup'
 /*
   STACK - usado quando você vai adicionar uma pilha de elementos e precisa de um espaço entre eles
   FORMCONTROL - usado para ficar por volta do FORMLABEL e o input e ela está atribuida
@@ -26,7 +24,22 @@ import { Input } from '../components/Form/Input'
   É interessante tipar os values que vem dentro da função handleSubmit.
   Como estou recebendo os valores de um formulário que vem do react-hook-form então ele também nos dá a tipagem a ser usada 
   neste caso, que é o SubmitHandler
-*/
+
+  Para obter os valores dos erros é preciso tipar o hook useForm() com a mesma tipagem que usada como parametro da tipagem SubmitHandler 
+
+  Para fazer validações importamos a lib yup e yupResolver
+
+  -segue o exemplo abaixo de como validar com yup
+
+  dentro do meu hook useForm abro um objeto, nele há uma propriedade chamada resolver
+  dentro dela eu passo a função yupResolver e dentro desta função passo a minha const construida sigInFormSchema para ser validada pelo yup
+
+ */
+// maneira de construir uma validação com yup
+const signInFormSchema = yup.object().shape({
+  email: yup.string().required('E-mail obrigatório').email('E-mail inválido'),
+  password: yup.string().required('Senha obrigatória')
+})
 
 interface SignInFormData {
   email: string
@@ -34,16 +47,15 @@ interface SignInFormData {
 }
 
 export default function SignIn() {
-  const { register, handleSubmit, formState } = useForm()
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting }
+  } = useForm<SignInFormData>({
+    resolver: yupResolver(signInFormSchema)
+  })
 
   // aqui eu informo que a minha função é do tipo SubmitHandler que vem do react-hook-form e recebe como parametro a minha interface identificando o que siginifica os values da minha função. Desta forma ela deixa de ser any.
-
-  // const handleSigin: SubmitHandler<SignInFormData> = async values => {
-  //   await new Promise(resolve => setTimeout(resolve, 2000))
-  //   console.log(values)
-  // }
-
-  console.log(formState.errors)
 
   const handleSignIn: SubmitHandler<SignInFormData> = async value => {
     await new Promise(resolve => setTimeout(resolve, 2000))
@@ -67,14 +79,14 @@ export default function SignIn() {
             name="email"
             label="E-mail"
             type="email"
-            error={formState.errors}
-            {...register('Email', { required: 'Email obrigatório' })}
+            error={errors.email}
+            {...register('email')}
           />
           <Input
             name="password"
             label="Senha"
             type="password"
-            error={formState.errors}
+            error={errors.password}
             {...register('password')}
           />
         </Stack>
@@ -84,8 +96,7 @@ export default function SignIn() {
           mt="6"
           colorScheme="pink"
           size="lg"
-          isLoading={formState.isSubmitting}
-          // formState retorna diversas propriedades uma delas é se o está submetendo
+          isLoading={isSubmitting}
         >
           Entrar
         </Button>
